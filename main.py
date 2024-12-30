@@ -1,6 +1,6 @@
 import pygame 
 from pygame.locals import*
-
+import random
 
 pygame.init()
 
@@ -21,6 +21,9 @@ flying = False
 flying2 = False
 game_over = False
 game_over2 = False
+pipe_gap = 150
+pipe_freq = 1500 ## 1.5 seconds
+last_pipe = pygame.time.get_ticks()
 
 
 class Bird(pygame.sprite.Sprite):
@@ -77,7 +80,7 @@ class Bird2(pygame.sprite.Sprite):
         self.index = 0
         self.counter = 0
         for num  in range(1,4):
-            img = pygame.image.load(f'img/bird{num}.png')
+            img = pygame.image.load(f'img/bird2{num}.png')
             self.images.append(img)
         self.image= self.images[self.index] 
         self.rect = self.image.get_rect()
@@ -119,10 +122,30 @@ class Bird2(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.images[self.index], self.vel *-2)
 
 
+class pipe(pygame.sprite.Sprite):
+    def __init__(self,x,y,position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("img/pipe.png")
+        self.rect = self.image.get_rect()
+        if position == 1:
+            self.image = pygame.transform.flip(self.image,False,True)
+            self.rect.bottomleft = [x,y - int(pipe_gap)/2]
+        elif position == -1:
+            self.rect.topleft = [x,y + int(pipe_gap)/2]
+
+    def update(self):
+        self.rect.x -= scroll_speed
+
+
+
+
+
 bird_group = pygame.sprite.Group()
+pipe_group = pygame.sprite.Group()
 
 flappy = Bird(220,int(screen_height/2))
 flappy2 = Bird2(40,int(screen_height/2))
+
 
 bird_group.add(flappy)
 bird_group.add(flappy2)
@@ -142,7 +165,9 @@ while run:
 
     bird_group.draw(screen)
     bird_group.update()
-  
+    pipe_group.draw(screen)
+    pipe_group.update()
+
     if flappy.rect.bottom > 768 and flappy2.rect.bottom > 768:
         game_over = True
         flying = False
@@ -161,10 +186,23 @@ while run:
 
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
-    if (game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2) == True:
+
+
+    if ((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))and flying == True and flying2 == True:
+        # pipes
+        time_now = pygame.time.get_ticks() 
+        if time_now - last_pipe > pipe_freq:
+            btm_pip = pipe(screen_width, int(screen_height/2), -1)
+            top_pip = pipe(screen_width, int(screen_height/2), 1)
+            pipe_group.add(btm_pip)
+            pipe_group.add(top_pip)
+            last_pipe = time_now
+
         ground_scroll -= scroll_speed
         if abs(ground_scroll) > 35:
             ground_scroll = 0
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
