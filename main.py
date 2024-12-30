@@ -45,10 +45,11 @@ class Bird(pygame.sprite.Sprite):
             self.rect.y += int(self.vel)
 
             #jump
-        if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w] and self.clicked == False:
             self.clicked = True
             self.vel = -10  
-        if pygame.mouse.get_pressed()[0] == 0:
+        if not keys[pygame.K_w] and self.clicked == True:
             self.clicked = False
 
         #flapping
