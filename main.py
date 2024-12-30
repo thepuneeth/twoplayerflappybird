@@ -17,6 +17,11 @@ pygame.display.set_caption("Flappy Bird")
 bg = pygame.image.load("img/bg.png")
 ground_img = pygame.image.load("img/ground.png")
 
+flying = False
+flying2 = False
+game_over = False
+game_over2 = False
+
 
 class Bird(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -37,12 +42,13 @@ class Bird(pygame.sprite.Sprite):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
-        self.vel += 0.5
-
-        if self.vel >= 8:
-            self.vel = 8
-        if self.rect.bottom < 768:
-            self.rect.y += int(self.vel)
+       
+        if flying == True:
+            self.vel += 0.5
+            if self.vel >= 8:
+                self.vel = 8
+            if self.rect.bottom < 768:
+                self.rect.y += int(self.vel)
 
             #jump
         keys = pygame.key.get_pressed()
@@ -85,13 +91,14 @@ class Bird2(pygame.sprite.Sprite):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
-        self.vel += 0.5
-
-        if self.vel >= 8:
-            self.vel = 8
-        if self.rect.bottom < 768:
-            self.rect.y += int(self.vel)
-            #jump
+        
+        if flying2 == True:
+            self.vel += 0.5
+            if self.vel >= 8:
+                self.vel = 8
+            if self.rect.bottom < 768:
+                self.rect.y += int(self.vel)
+                #jump
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.clicked == False:
@@ -114,8 +121,8 @@ class Bird2(pygame.sprite.Sprite):
 
 bird_group = pygame.sprite.Group()
 
-flappy = Bird(100,int(screen_height/2))
-flappy2 = Bird2(100,int(screen_height/3))
+flappy = Bird(220,int(screen_height/2))
+flappy2 = Bird2(40,int(screen_height/2))
 
 bird_group.add(flappy)
 bird_group.add(flappy2)
@@ -124,6 +131,8 @@ run = True
 
 ground_scroll = 0
 scroll_speed = 4
+
+keys = pygame.key.get_pressed()
 
 while run:
     #draw
@@ -134,15 +143,34 @@ while run:
     bird_group.draw(screen)
     bird_group.update()
   
+    if flappy.rect.bottom > 768 and flappy2.rect.bottom > 768:
+        game_over = True
+        flying = False
+        game_over2 = True
+        flying2 = False
+    elif flappy.rect.bottom > 768 and flappy2.rect.bottom < 768:
+        game_over = True
+        flying = False
+        game_over2 = False
+        flying2 = True
+    elif flappy.rect.bottom < 768 and flappy2.rect.bottom > 768:
+        game_over = False
+        flying = True
+        game_over2 = True
+        flying2 = False
+
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
-    ground_scroll -= scroll_speed
-    if abs(ground_scroll) > 35:
-        ground_scroll = 0
+    if game_over == False and game_over2 == False or game_over == True and game_over2 == False or game_over == False and game_over2 == True:
+        ground_scroll -= scroll_speed
+        if abs(ground_scroll) > 35:
+            ground_scroll = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and flying == False and flying2 == False and game_over == False and game_over2 == False:
+            flying = True
+            flying2 = True
     pygame.display.update()
     
 pygame.quit()
