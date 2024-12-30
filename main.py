@@ -161,7 +161,7 @@ while run:
 
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
-    if game_over == False and game_over2 == False or game_over == True and game_over2 == False or game_over == False and game_over2 == True:
+    if (game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2) == True:
         ground_scroll -= scroll_speed
         if abs(ground_scroll) > 35:
             ground_scroll = 0
