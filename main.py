@@ -25,11 +25,20 @@ def display_text(text, font, text_color, x, y):
     img = font.render(text, True, text_color)
     screen.blit(img, (x, y))
 
+def reset_game():
+    pipe_group.empty()
+    flappy.rect.x = 220
+    flappy.rect.y = int(screen_height/2)
+    flappy2.rect.x = 40
+    flappy2.rect.y = int(screen_height/2)
+    score = 0
+    return score
+
 flying = False
 flying2 = False
 game_over = False
 game_over2 = False
-pipe_gap = 300
+pipe_gap = 150
 pipe_freq = 1500 ## 1.5 seconds
 last_pipe = pygame.time.get_ticks()
 
@@ -39,7 +48,16 @@ class Button():
         self.rect = self.image.get_rect()
         self.rect.topleft = (x,y)
     def draw(self):
+        action = False
+        pos  = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                action = True
+
         screen.blit(self.image , (self.rect.x  , self.rect.y))
+
+        return action
 
 
 class Bird(pygame.sprite.Sprite):
@@ -61,9 +79,8 @@ class Bird(pygame.sprite.Sprite):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
-        if flying == False and game_over == True:
-            self.vel += 0.5
-            
+
+
         if flying == True:
             self.vel += 0.5
             if self.vel >= 8:
@@ -112,8 +129,8 @@ class Bird2(pygame.sprite.Sprite):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
-        if flying2 == False and game_over2 == True:
-            self.vel += 0.5
+
+
             
         if flying2 == True:
             self.vel += 0.5
@@ -216,6 +233,25 @@ while run:
             if bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.right:
                 score += 1
                 pass_pipe_bird_2 = False
+     ##game and flight logic for 2 birds
+    if (flappy.rect.bottom > 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom < 0):
+        game_over = True
+        flying = False
+        game_over2 = True
+        flying2 = False
+        
+    elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0):
+        game_over = True
+        flying = False
+        game_over2 = False
+        flying2 = True
+    elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0):
+        game_over = False
+        flying = True
+        game_over2 = True
+        flying2 = False
+
+
 
     display_text(str(score), font, white, int(screen_width/2), 20)
     ##collision logic
@@ -226,26 +262,7 @@ while run:
         elif bird == flappy2 and flying2 == True:       
             game_over2 = True
             flying2 = False
-        
-
-        
-
- ##game and flight logic for 2 birds
-    if flappy.rect.bottom > 768 and flappy2.rect.bottom > 768:
-        game_over = True
-        flying = False
-        game_over2 = True
-        flying2 = False
-    elif flappy.rect.bottom > 768 and flappy2.rect.bottom < 768:
-        game_over = True
-        flying = False
-        game_over2 = False
-        flying2 = True
-    elif flappy.rect.bottom < 768 and flappy2.rect.bottom > 768:
-        game_over = False
-        flying = True
-        game_over2 = True
-        flying2 = False
+               
 
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
@@ -274,8 +291,11 @@ while run:
         if abs(ground_scroll) > 35:
             ground_scroll = 0
 
-    if game_over == True and game_over2 == True:
-        button.draw()
+    elif (game_over == True and game_over2 == True):
+        if button.draw():
+            score = reset_game()
+            game_over = False
+            game_over2 = False
         ##start and quit 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
