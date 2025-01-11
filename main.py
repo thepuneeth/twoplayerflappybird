@@ -234,6 +234,8 @@ while run:
     elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0) and (flappy2_countdown == False) :
         game_over2 = False
         flying2 = True
+        game_over = True
+        flying = False
         flappy_countdown = True
         
     elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0) and (flappy_countdown == False) :
@@ -306,7 +308,7 @@ while run:
     screen.blit(ground_img,(ground_scroll,768))
     display_text(str(score), font, white, int(screen_width/2), 20)
     if flappy_countdown == True or flappy2_countdown == True:
-        display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 50)
+        display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 830)
 
         #works
     if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
@@ -339,16 +341,13 @@ while run:
             flappy2_countdown = False
             flappy_countdown = False
             revive_count = 5
-            revived_question  = False
-            revived_question2 = False
-            immunity_timer = 2000
-            immunity_timer2 = 2000
+
         ##start and quit 
 
     if flying == False and flying2 == False and game_over == False and game_over2 == False:
-        display_text("Press Space to Play", font, white ,int(screen_height/4.2),int(100))
-        display_text("Player 1: UP arrow to Jump", font, white ,int(screen_height/4.2),int(200))
-        display_text("Player 2: SPACE to Jump", font, white,int(screen_height/4.2),int(300))
+        display_text("Press Space to Play", font, white ,int(screen_height/4),int(100))
+        display_text("Player 1: UP arrow to Jump", font, white ,int(screen_height/4.5),int(200))
+        display_text("Player 2: SPACE to Jump", font, white,int(screen_height/4.5),int(300))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
