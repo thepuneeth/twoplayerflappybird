@@ -15,6 +15,7 @@ pygame.display.set_caption("Flappy Bird")
 
 font = pygame.font.SysFont("Bauhaus 93", 60)
 white = (255,255,255)
+red = (255,0,0)
 
 bg = pygame.image.load("img/bg.png")
 ground_img = pygame.image.load("img/ground.png")
@@ -34,11 +35,12 @@ def reset_game():
     score = 0
     return score
 
+
 flying = False
 flying2 = False
 game_over = False
 game_over2 = False
-pipe_gap = 150
+pipe_gap = 150 * 2
 pipe_freq = 1500 ## 1.5 seconds
 last_pipe = pygame.time.get_ticks()
 
@@ -196,6 +198,9 @@ scroll_speed = 4
 pass_pipe_bird_1 = False
 pass_pipe_bird_2 = False
 score = 0
+revive_count = 5
+flappy_countdown = False
+flappy2_countdown = False
 
 
 ## game 
@@ -212,6 +217,27 @@ while run:
 
     #collision logic
     collision = pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
+         ##game and flight logic for 2 birds
+    if (flappy.rect.bottom > 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom < 0):
+        game_over = True
+        flying = False
+        game_over2 = True
+        flying2 = False
+        
+    elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0) and flappy2_countdown == False:
+        game_over = True
+        flying = False
+        game_over2 = False
+        flying2 = True
+        flappy_countdown = True
+        
+    elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0) and flappy_countdown == False:
+        game_over = False
+        flying = True
+        game_over2 = True
+        flying2 = False
+        flappy2_countdown = True
+        
 
     ##scoring logic
 
@@ -220,36 +246,41 @@ while run:
         and bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right\
         and pass_pipe_bird_1 == False and flying == True:
             pass_pipe_bird_1 = True
+
         elif bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.left\
         and bird_group.sprites()[1].rect.right < pipe_group.sprites()[0].rect.right\
         and pass_pipe_bird_2 == False and flying2 == True:
             pass_pipe_bird_2 = True
 
+
         elif pass_pipe_bird_1 == True:
             if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
-                score += 1
+                score += 10
                 pass_pipe_bird_1 = False
+                if flappy2_countdown  == True and revive_count > 0:
+                    revive_count -= 1     
+                elif flappy2_countdown == True and revive_count == 0:
+                    flappy2_countdown = False
+                    flappy2.rect.x = 40
+                    flappy2.rect.y = int(screen_height/2)
+                    revive_count = 5
+                    flying2 = True
+                    game_over2 = False            
         elif pass_pipe_bird_2 == True:
             if bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.right:
-                score += 1
+                score += 10
                 pass_pipe_bird_2 = False
-     ##game and flight logic for 2 birds
-    if (flappy.rect.bottom > 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom < 0):
-        game_over = True
-        flying = False
-        game_over2 = True
-        flying2 = False
-        
-    elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0):
-        game_over = True
-        flying = False
-        game_over2 = False
-        flying2 = True
-    elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0):
-        game_over = False
-        flying = True
-        game_over2 = True
-        flying2 = False
+                if flappy_countdown == True and revive_count > 0:
+                    revive_count -= 1
+                elif flappy_countdown == True and revive_count == 0:
+                    flappy_countdown = False
+                    flappy.rect.x = 220
+                    flappy.rect.y = int(screen_height/2)
+                    revive_count = 5
+                    flying = True
+                    game_over = False
+
+
 
 
 
@@ -259,14 +290,17 @@ while run:
         if bird == flappy and flying == True:   
             game_over = True
             flying = False
+            flappy_countdown = True
         elif bird == flappy2 and flying2 == True:       
             game_over2 = True
             flying2 = False
+            flappy2_countdown = True
                
-
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
     display_text(str(score), font, white, int(screen_width/2), 20)
+    if flappy_countdown == True or flappy2_countdown == True:
+        display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 50)
 
         #works
     if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
@@ -296,6 +330,9 @@ while run:
             score = reset_game()
             game_over = False
             game_over2 = False
+            flappy2_countdown = False
+            flappy_countdown = False
+            count_down = 5 
         ##start and quit 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
