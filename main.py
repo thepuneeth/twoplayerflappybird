@@ -21,7 +21,7 @@ flying = False
 flying2 = False
 game_over = False
 game_over2 = False
-pipe_gap = 150
+pipe_gap = 300
 pipe_freq = 1500 ## 1.5 seconds
 last_pipe = pygame.time.get_ticks()
 
@@ -45,7 +45,9 @@ class Bird(pygame.sprite.Sprite):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
-       
+        if flying == False and game_over == True:
+            self.vel += 0.5
+            
         if flying == True:
             self.vel += 0.5
             if self.vel >= 8:
@@ -54,12 +56,12 @@ class Bird(pygame.sprite.Sprite):
                 self.rect.y += int(self.vel)
 
             #jump
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w] and self.clicked == False:
-            self.clicked = True
-            self.vel = -10  
-        if not keys[pygame.K_w] and self.clicked == True:
-            self.clicked = False
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w] and self.clicked == False:
+                self.clicked = True
+                self.vel = -10  
+            if not keys[pygame.K_w] and self.clicked == True:
+                self.clicked = False
 
         #flapping
         if self.counter > flap_cooldown:
@@ -94,7 +96,9 @@ class Bird2(pygame.sprite.Sprite):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
-        
+        if flying2 == False and game_over2 == True:
+            self.vel += 0.5
+            
         if flying2 == True:
             self.vel += 0.5
             if self.vel >= 8:
@@ -102,13 +106,12 @@ class Bird2(pygame.sprite.Sprite):
             if self.rect.bottom <= 768:
                 self.rect.y += int(self.vel)
                 #jump
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and self.clicked == False:
-            self.clicked = True
-            self.vel = -10  
-        if not keys[pygame.K_SPACE] and self.clicked == True:
-            self.clicked = False
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] and self.clicked == False:
+                    self.clicked = True
+                    self.vel = -10  
+            if not keys[pygame.K_SPACE] and self.clicked == True:
+                    self.clicked = False
 
         #flapping
         if self.counter > flap_cooldown:
@@ -167,22 +170,22 @@ while run:
     clock.tick(fps) 
 
     bird_group.draw(screen)
-    bird_group.update()
-    pipe_group.draw(screen)
     
+    pipe_group.draw(screen)
+    bird_group.update()
 
+    #collision logic
+    collision = pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
+    for bird in collision:
+        if bird == flappy and flying == True:   
+            game_over = True
+            flying = False
+        elif bird == flappy2 and flying2 == True:       
+            game_over2 = True
+            flying2 = False
+        
 
-
-  
-    ##collision logic
-    #if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.bottom < 0 and flappy2.rect.bottom > 0 : 
-      # game_over1 = True
-    #elif pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy2.rect.bottom < 0 and flappy.rect.bottom > 0 :
-       # game_over2 = True
-    #elif pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or(flappy.rect.bottom < 0 and flappy2.rect.bottom < 0):
-       # game_over1 = True
-     #   game_over2 = True
-
+        
 
  ##game and flight logic for 2 birds
     if flappy.rect.bottom > 768 and flappy2.rect.bottom > 768:
@@ -204,7 +207,7 @@ while run:
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
 
-
+        #works
     if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
         
         # pipes
@@ -221,15 +224,17 @@ while run:
 
         pipe_group.update()
 
+
+
         ground_scroll -= scroll_speed
         if abs(ground_scroll) > 35:
             ground_scroll = 0
 
-
+        ##start and quit 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_w and flying == False and flying2 == False and game_over == False and game_over2 == False:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and flying == False and flying2 == False and game_over == False and game_over2 == False:
             flying = True
             flying2 = True
     pygame.display.update()
