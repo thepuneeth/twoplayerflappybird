@@ -13,9 +13,17 @@ fps = 60
 screen= pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Flappy Bird")
 
+font = pygame.font.SysFont("Bauhaus 93", 60)
+white = (255,255,255)
 
 bg = pygame.image.load("img/bg.png")
 ground_img = pygame.image.load("img/ground.png")
+button_img = pygame.image.load("img/restart.png")
+
+
+def display_text(text, font, text_color, x, y):
+    img = font.render(text, True, text_color)
+    screen.blit(img, (x, y))
 
 flying = False
 flying2 = False
@@ -24,6 +32,14 @@ game_over2 = False
 pipe_gap = 300
 pipe_freq = 1500 ## 1.5 seconds
 last_pipe = pygame.time.get_ticks()
+
+class Button():
+    def __init__(self, x,y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
+    def draw(self):
+        screen.blit(self.image , (self.rect.x  , self.rect.y))
 
 
 class Bird(pygame.sprite.Sprite):
@@ -143,7 +159,7 @@ class pipe(pygame.sprite.Sprite):
 
 
 
-
+button = Button(screen_width // 2 - 50, screen_height // 2 - 100, button_img)
 
 bird_group = pygame.sprite.Group()
 pipe_group = pygame.sprite.Group()
@@ -160,6 +176,9 @@ run = True
 ground_scroll = 0
 scroll_speed = 4
 
+pass_pipe_bird_1 = False
+pass_pipe_bird_2 = False
+score = 0
 
 
 ## game 
@@ -176,6 +195,30 @@ while run:
 
     #collision logic
     collision = pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
+
+    ##scoring logic
+
+    if len(pipe_group) > 0:
+        if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left\
+        and bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right\
+        and pass_pipe_bird_1 == False and flying == True:
+            pass_pipe_bird_1 = True
+        elif bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.left\
+        and bird_group.sprites()[1].rect.right < pipe_group.sprites()[0].rect.right\
+        and pass_pipe_bird_2 == False and flying2 == True:
+            pass_pipe_bird_2 = True
+
+        elif pass_pipe_bird_1 == True:
+            if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
+                score += 1
+                pass_pipe_bird_1 = False
+        elif pass_pipe_bird_2 == True:
+            if bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.right:
+                score += 1
+                pass_pipe_bird_2 = False
+
+    display_text(str(score), font, white, int(screen_width/2), 20)
+    ##collision logic
     for bird in collision:
         if bird == flappy and flying == True:   
             game_over = True
@@ -206,6 +249,7 @@ while run:
 
     #draw and scroll
     screen.blit(ground_img,(ground_scroll,768))
+    display_text(str(score), font, white, int(screen_width/2), 20)
 
         #works
     if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
@@ -230,6 +274,8 @@ while run:
         if abs(ground_scroll) > 35:
             ground_scroll = 0
 
+    if game_over == True and game_over2 == True:
+        button.draw()
         ##start and quit 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
