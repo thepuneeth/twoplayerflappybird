@@ -36,6 +36,8 @@ def reset_game():
     flappy.rect.y = int(screen_height/2)
     flappy2.rect.x = 40
     flappy2.rect.y = int(screen_height/2)
+    flappy.just_revived = False
+    flappy2.just_revived = False    
     score = 0
     return score
 
@@ -80,14 +82,47 @@ class Bird(pygame.sprite.Sprite):
         self.rect.center = [x,y]
         self.vel = 0
         self.clicked = False
-
+        self.just_revived = False
+        self.revive_index = 0
     def update(self):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
+        if self.just_revived == True :
+            self.vel += 0.5
+            if self.vel >= 8:
+                self.vel = 8
+            if self.rect.bottom <= 768:
+                self.rect.y += int(self.vel)
 
+            #jump
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP] and self.clicked == False:
+                self.clicked = True
+                self.vel = -10  
+            if not keys[pygame.K_UP] and self.clicked == True:
+                self.clicked = False
 
-        if flying == True:
+            #flapping
+            if self.counter > flap_cooldown:
+                self.counter = 0
+                self.index += 1
+                if self.index ==2:
+                    self.image = self.images[self.index].set_alpha(100)
+                if self.index >= 3:
+                    self.index = 0
+                    self.revive_index +=1
+                if self.revive_index >= 19:
+                    self.just_revived = False
+                    self.revive_index  = 0 
+                    self.image = self.images[2].set_alpha(255)
+            self.image = self.images[self.index]
+
+            #flopping
+            self.image = pygame.transform.rotate(self.images[self.index], self.vel *-2)
+        
+
+        if flying == True and not self.just_revived:
             self.vel += 0.5
             if self.vel >= 8:
                 self.vel = 8
@@ -129,17 +164,48 @@ class Bird2(pygame.sprite.Sprite):
         self.rect.center = [x,y]
         self.vel = 0
         self.clicked = False
-        
+        self.just_revived = False
+        self.revive_index = 0
         
 
     def update(self):
         ##varibales
         self.counter += 1
         flap_cooldown = 5
+        if self.just_revived == True :
+             
+            self.vel += 0.5
+            if self.vel >= 8:
+                self.vel = 8
+            if self.rect.bottom <= 768:
+                self.rect.y += int(self.vel)
+                #jump
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] and self.clicked == False:
+                    self.clicked = True
+                    self.vel = -10  
+            if not keys[pygame.K_SPACE] and self.clicked == True:
+                    self.clicked = False
 
+        #flapping
+            if self.counter > flap_cooldown:
+                self.counter = 0
+                self.index += 1
+                if self.index  == 2:
+                    self.image  = self.images[self.index].set_alpha(100)
+                if self.index >= 3:
+                    self.index = 0
+                    self.revive_index +=1 
+            self.image = self.images[self.index]
+            if self.revive_index >= 19:
+                self.just_revived = False
+                self.revive_index = 0
+                self.image = self.images[2].set_alpha(255)
+            #flopping
+            self.image = pygame.transform.rotate(self.images[self.index], self.vel *-2)
 
             
-        if flying2 == True:
+        if flying2 == True and not self.just_revived:
             self.vel += 0.5
             if self.vel >= 8:
                 self.vel = 8
@@ -230,6 +296,7 @@ while run:
         flying = False
         game_over2 = True
         flying2 = False
+        flappy2.just_revived = False
         
     elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0) and (flappy2_countdown == False) :
         game_over2 = False
@@ -237,6 +304,7 @@ while run:
         game_over = True
         flying = False
         flappy_countdown = True
+        flappy.just_revived = False
         
     elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0) and (flappy_countdown == False) :
         game_over = False
@@ -244,6 +312,8 @@ while run:
         game_over2 = True
         flying2 = False
         flappy2_countdown = True
+        flappy.just_revived = False
+        flappy2.just_revived = False
         
 
     ##scoring logic
@@ -273,6 +343,7 @@ while run:
                     revive_count = 5
                     flying2 = True
                     game_over2 = False
+                    flappy2.just_revived = True
                    
         elif pass_pipe_bird_2 == True:
             if bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.right:
@@ -287,6 +358,7 @@ while run:
                     revive_count = 5  
                     flying = True 
                     game_over = False
+                    flappy.just_revived = True
 
 
 
@@ -295,11 +367,12 @@ while run:
     display_text(str(score), font, white, int(screen_width/2), 20)
     ##collision logic
     for bird in collision:
-        if bird == flappy and flying == True :
+        if bird == flappy and flying == True and not flappy.just_revived:
             game_over = True
             flying = False
             flappy_countdown = True
-        elif bird == flappy2 and flying2 == True:     
+            
+        elif bird == flappy2 and flying2 == True and not flappy2.just_revived:     
             game_over2 = True
             flying2 = False
             flappy2_countdown = True
@@ -308,7 +381,7 @@ while run:
     screen.blit(ground_img,(ground_scroll,768))
     display_text(str(score), font, white, int(screen_width/2), 20)
     if flappy_countdown == True or flappy2_countdown == True:
-        display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 830)
+        display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 80)
 
         #works
     if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
@@ -341,6 +414,9 @@ while run:
             flappy2_countdown = False
             flappy_countdown = False
             revive_count = 5
+            print(flappy.just_revived)
+            print(flappy2.just_revived)
+
 
         ##start and quit 
 
@@ -354,6 +430,8 @@ while run:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and flying == False and flying2 == False and game_over == False and game_over2 == False:
             flying = True
             flying2 = True
+            flappy.just_revived = False
+            flappy2.just_revived = False
     pygame.display.update()
     
 pygame.quit()
