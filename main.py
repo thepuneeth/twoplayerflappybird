@@ -18,6 +18,7 @@ screen= pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Flappy Bird")
 
 font = pygame.font.SysFont("Bauhaus 93", 60)
+small_font = pygame.font.SysFont("Bauhaus 93", 40)
 white = (255,255,255)
 red = (255,0,0)
 
@@ -58,10 +59,12 @@ class Button():
     def draw(self):
         action = False
         pos  = pygame.mouse.get_pos()
-
+        
         if self.rect.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 action = True
+        elif pygame.key.get_pressed()[K_r]:
+            action = True
 
         screen.blit(self.image , (self.rect.x  , self.rect.y))
 
@@ -112,7 +115,7 @@ class Bird(pygame.sprite.Sprite):
                 if self.index >= 3:
                     self.index = 0
                     self.revive_index +=1
-                if self.revive_index >= 19:
+                if self.revive_index >= 10:
                     self.just_revived = False
                     self.revive_index  = 0 
                     self.image = self.images[2].set_alpha(255)
@@ -197,7 +200,7 @@ class Bird2(pygame.sprite.Sprite):
                     self.index = 0
                     self.revive_index +=1 
             self.image = self.images[self.index]
-            if self.revive_index >= 19:
+            if self.revive_index >= 10:
                 self.just_revived = False
                 self.revive_index = 0
                 self.image = self.images[2].set_alpha(255)
@@ -297,6 +300,8 @@ while run:
         game_over2 = True
         flying2 = False
         flappy2.just_revived = False
+        flappy2.images[2].set_alpha(255)
+        flappy2.revive_index = 0
         
     elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0) and (flappy2_countdown == False) :
         game_over2 = False
@@ -305,6 +310,9 @@ while run:
         flying = False
         flappy_countdown = True
         flappy.just_revived = False
+        flappy.images[2].set_alpha(255)
+        flappy.revive_index = 0
+        
         
     elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0) and (flappy_countdown == False) :
         game_over = False
@@ -314,6 +322,10 @@ while run:
         flappy2_countdown = True
         flappy.just_revived = False
         flappy2.just_revived = False
+        flappy.images[2].set_alpha(255)
+        flappy2.images[2].set_alpha(255)
+        flappy.revive_index = 0
+        flappy2.revive_index = 0
         
 
     ##scoring logic
@@ -414,16 +426,18 @@ while run:
             flappy2_countdown = False
             flappy_countdown = False
             revive_count = 5
-            print(flappy.just_revived)
-            print(flappy2.just_revived)
+
 
 
         ##start and quit 
 
     if flying == False and flying2 == False and game_over == False and game_over2 == False:
-        display_text("Press Space to Play", font, white ,int(screen_height/4),int(100))
-        display_text("Player 1: UP arrow to Jump", font, white ,int(screen_height/4.5),int(200))
-        display_text("Player 2: SPACE to Jump", font, white,int(screen_height/4.5),int(300))
+        display_text("Press Space to Play", small_font, white ,                  int(10),int(20))
+        display_text("Use 'R' or MOUSE to Restart", small_font, white,           int(10),int(100))
+        display_text("Player 1: UP arrow to Jump", small_font, white ,           int(10),int(160))
+        display_text("Player 2: SPACE to Jump", small_font, white,               int(10),int(200))
+        display_text("Pass through pipes to revive!", small_font, white,         int(10),int(260))
+        display_text("Brief Immunity from PIPES after revive", small_font, white,int(10),int(340))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
