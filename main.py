@@ -1,7 +1,8 @@
 from itertools import filterfalse
 import pygame 
 from pygame.locals import*
-import random
+import random ,asyncio
+
 
 pygame.init()
 
