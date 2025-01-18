@@ -47,7 +47,7 @@ flying = False
 flying2 = False
 game_over = False
 game_over2 = False
-pipe_gap = 170
+pipe_gap = 180
 pipe_freq = 1500 ## 1.5 seconds
 last_pipe = pygame.time.get_ticks()
 
