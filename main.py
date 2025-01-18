@@ -15,7 +15,7 @@ fps = 60
 import time
 
 screen= pygame.display.set_mode((screen_width,screen_height))
-pygame.display.set_caption("Flappy Bird")
+pygame.display.set_caption("Flopping Birds")
 
 font = pygame.font.SysFont("Bauhaus 93", 60)
 small_font = pygame.font.SysFont("Bauhaus 93", 40)
@@ -47,7 +47,7 @@ flying = False
 flying2 = False
 game_over = False
 game_over2 = False
-pipe_gap = 220
+pipe_gap = 170
 pipe_freq = 1500 ## 1.5 seconds
 last_pipe = pygame.time.get_ticks()
 
