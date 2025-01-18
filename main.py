@@ -1,7 +1,8 @@
 from itertools import filterfalse
 import pygame 
 from pygame.locals import*
-import random ,asyncio
+import random
+import asyncio
 
 
 pygame.init()
@@ -273,181 +274,184 @@ scroll_speed = 4
 
 pass_pipe_bird_1 = False
 pass_pipe_bird_2 = False
-score = 0
+
 revive_count = 5
 flappy_countdown = False
 flappy2_countdown = False
+score = 0
 
-
+async def main():
+    global score, ground_scroll, flying, flying2, game_over, game_over2
+    global pass_pipe_bird_1, pass_pipe_bird_2, flappy_countdown, flappy2_countdown
+    global revive_count, last_pipe
 ## game 
-while run:
-    #draw
-    current_time = pygame.time.get_ticks()
-    screen.blit(bg,(0,0))
+    while True:
+        #draw
+        current_time = pygame.time.get_ticks()
+        screen.blit(bg,(0,0))
 
-    clock.tick(fps) 
+        clock.tick(fps) 
 
-    bird_group.draw(screen)
-    
-    pipe_group.draw(screen)
-    bird_group.update()
-
-    #collision logic
-    collision = pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
-         ##game and flight logic for 2 birds
-    if (flappy.rect.bottom > 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom < 0) :
-        game_over = True
-        flying = False
-        game_over2 = True
-        flying2 = False
-        flappy2.just_revived = False
-        flappy2.images[2].set_alpha(255)
-        flappy2.revive_index = 0
+        bird_group.draw(screen)
         
-    elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0) and (flappy2_countdown == False) :
-        game_over2 = False
-        flying2 = True
-        game_over = True
-        flying = False
-        flappy_countdown = True
-        flappy.just_revived = False
-        flappy.images[2].set_alpha(255)
-        flappy.revive_index = 0
-        
-        
-    elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0) and (flappy_countdown == False) :
-        game_over = False
-        flying = True
-        game_over2 = True
-        flying2 = False
-        flappy2_countdown = True
-        flappy.just_revived = False
-        flappy2.just_revived = False
-        flappy.images[2].set_alpha(255)
-        flappy2.images[2].set_alpha(255)
-        flappy.revive_index = 0
-        flappy2.revive_index = 0
-        
+        pipe_group.draw(screen)
+        bird_group.update()
 
-    ##scoring logic
-
-    if len(pipe_group) > 0:
-        if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left\
-        and bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right\
-        and pass_pipe_bird_1 == False and flying == True:
-            pass_pipe_bird_1 = True
-
-        elif bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.left\
-        and bird_group.sprites()[1].rect.right < pipe_group.sprites()[0].rect.right\
-        and pass_pipe_bird_2 == False and flying2 == True:
-            pass_pipe_bird_2 = True
-
-
-        elif pass_pipe_bird_1 == True:
-            if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
-                score += 10
-                pass_pipe_bird_1 = False
-                if flappy2_countdown  == True and revive_count > 1:
-                    revive_count -= 1     
-                elif flappy2_countdown == True and revive_count == 1:
-                    flappy2_countdown = False
-                    flappy2.rect.x = 40
-                    flappy2.rect.y = int(screen_height/2)
-                    revive_count = 5
-                    flying2 = True
-                    game_over2 = False
-                    flappy2.just_revived = True
-                   
-        elif pass_pipe_bird_2 == True:
-            if bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.right:
-                score += 10
-                pass_pipe_bird_2 = False
-                if flappy_countdown == True and revive_count > 1:
-                    revive_count -= 1
-                elif flappy_countdown == True and revive_count == 1:           
-                    flappy_countdown = False
-                    flappy.rect.x = 220
-                    flappy.rect.y = int(screen_height/2)
-                    revive_count = 5  
-                    flying = True 
-                    game_over = False
-                    flappy.just_revived = True
-
-
-
-
-
-    display_text(str(score), font, white, int(screen_width/2), 20)
-    ##collision logic
-    for bird in collision:
-        if bird == flappy and flying == True and not flappy.just_revived:
+        #collision logic
+        collision = pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
+            ##game and flight logic for 2 birds
+        if (flappy.rect.bottom > 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom < 0) :
+            game_over = True
+            flying = False
+            game_over2 = True
+            flying2 = False
+            flappy2.just_revived = False
+            flappy2.images[2].set_alpha(255)
+            flappy2.revive_index = 0
+            
+        elif (flappy.rect.bottom > 768 and flappy2.rect.bottom < 768) or (flappy.rect.bottom < 0 and flappy2.rect.bottom > 0) and (flappy2_countdown == False) :
+            game_over2 = False
+            flying2 = True
             game_over = True
             flying = False
             flappy_countdown = True
+            flappy.just_revived = False
+            flappy.images[2].set_alpha(255)
+            flappy.revive_index = 0
             
-        elif bird == flappy2 and flying2 == True and not flappy2.just_revived:     
+            
+        elif (flappy.rect.bottom < 768 and flappy2.rect.bottom > 768) or (flappy.rect.bottom > 0 and flappy2.rect.bottom < 0) and (flappy_countdown == False) :
+            game_over = False
+            flying = True
             game_over2 = True
             flying2 = False
             flappy2_countdown = True
-               
-    #draw and scroll
-    screen.blit(ground_img,(ground_scroll,768))
-    display_text(str(score), font, white, int(screen_width/2), 20)
-    if flappy_countdown == True or flappy2_countdown == True:
-        display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 80)
-
-        #works
-    if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
-        
-        # pipes
-        time_now = pygame.time.get_ticks() 
-
-        if time_now - last_pipe > pipe_freq:
-            pipe_height = random.randint(-100, 100)
-            btm_pip = pipe(screen_width, int(screen_height/2)+pipe_height, -1)
-            top_pip = pipe(screen_width, int(screen_height/2)+pipe_height, 1)
-            pipe_group.add(btm_pip)
-            pipe_group.add(top_pip)
-            last_pipe = time_now
-         
-
-        pipe_group.update()
-
-
-
-        ground_scroll -= scroll_speed
-        if abs(ground_scroll) > 35:
-            ground_scroll = 0
-
-    elif (game_over == True and game_over2 == True):
-        if button.draw():
-            score = reset_game()
-            game_over = False
-            game_over2 = False
-            flappy2_countdown = False
-            flappy_countdown = False
-            revive_count = 5
-
-
-
-        ##start and quit 
-
-    if flying == False and flying2 == False and game_over == False and game_over2 == False:
-        display_text("Press Space to Play", small_font, white ,                  int(10),int(20))
-        display_text("Use 'R' or MOUSE to Restart", small_font, white,           int(10),int(100))
-        display_text("Player 1: UP arrow to Jump", small_font, white ,           int(10),int(160))
-        display_text("Player 2: SPACE to Jump", small_font, white,               int(10),int(200))
-        display_text("Pass through pipes to revive!", small_font, white,         int(10),int(260))
-        display_text("Brief Immunity from PIPES after revive", small_font, white,int(10),int(340))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and flying == False and flying2 == False and game_over == False and game_over2 == False:
-            flying = True
-            flying2 = True
             flappy.just_revived = False
             flappy2.just_revived = False
-    pygame.display.update()
-    
-pygame.quit()
+            flappy.images[2].set_alpha(255)
+            flappy2.images[2].set_alpha(255)
+            flappy.revive_index = 0
+            flappy2.revive_index = 0
+            
+
+        ##scoring logic
+
+        if len(pipe_group) > 0:
+            if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left\
+            and bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right\
+            and pass_pipe_bird_1 == False and flying == True:
+                pass_pipe_bird_1 = True
+
+            elif bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.left\
+            and bird_group.sprites()[1].rect.right < pipe_group.sprites()[0].rect.right\
+            and pass_pipe_bird_2 == False and flying2 == True:
+                pass_pipe_bird_2 = True
+
+
+            elif pass_pipe_bird_1 == True:
+                if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
+                    score += 10
+                    pass_pipe_bird_1 = False
+                    if flappy2_countdown  == True and revive_count > 1:
+                        revive_count -= 1     
+                    elif flappy2_countdown == True and revive_count == 1:
+                        flappy2_countdown = False
+                        flappy2.rect.x = 40
+                        flappy2.rect.y = int(screen_height/2)
+                        revive_count = 5
+                        flying2 = True
+                        game_over2 = False
+                        flappy2.just_revived = True
+                    
+            elif pass_pipe_bird_2 == True:
+                if bird_group.sprites()[1].rect.left > pipe_group.sprites()[0].rect.right:
+                    score += 10
+                    pass_pipe_bird_2 = False
+                    if flappy_countdown == True and revive_count > 1:
+                        revive_count -= 1
+                    elif flappy_countdown == True and revive_count == 1:           
+                        flappy_countdown = False
+                        flappy.rect.x = 220
+                        flappy.rect.y = int(screen_height/2)
+                        revive_count = 5  
+                        flying = True 
+                        game_over = False
+                        flappy.just_revived = True
+
+
+
+
+
+        display_text(str(score), font, white, int(screen_width/2), 20)
+        ##collision logic
+        for bird in collision:
+            if bird == flappy and flying == True and not flappy.just_revived:
+                game_over = True
+                flying = False
+                flappy_countdown = True
+                
+            elif bird == flappy2 and flying2 == True and not flappy2.just_revived:     
+                game_over2 = True
+                flying2 = False
+                flappy2_countdown = True
+                
+        #draw and scroll
+        screen.blit(ground_img,(ground_scroll,768))
+        display_text(str(score), font, white, int(screen_width/2), 20)
+        if flappy_countdown == True or flappy2_countdown == True:
+            display_text(f' Revive In: {str(revive_count)}', font, red, int(screen_width/3), 80)
+
+            #works
+        if (((game_over == False and game_over2 == False) or (game_over == True and game_over2 == False) or (game_over == False and game_over2 == True))) and (((flying == True and flying2 == True) or (flying == True and flying2 == False) or (flying == False and flying2 == True))) :
+            
+            # pipes
+            time_now = pygame.time.get_ticks() 
+
+            if time_now - last_pipe > pipe_freq:
+                pipe_height = random.randint(-100, 100)
+                btm_pip = pipe(screen_width, int(screen_height/2)+pipe_height, -1)
+                top_pip = pipe(screen_width, int(screen_height/2)+pipe_height, 1)
+                pipe_group.add(btm_pip)
+                pipe_group.add(top_pip)
+                last_pipe = time_now
+            
+
+            pipe_group.update()
+
+
+
+            ground_scroll -= scroll_speed
+            if abs(ground_scroll) > 35:
+                ground_scroll = 0
+
+        elif (game_over == True and game_over2 == True):
+            if button.draw():
+                score = reset_game()
+                game_over = False
+                game_over2 = False
+                flappy2_countdown = False
+                flappy_countdown = False
+                revive_count = 5
+
+
+
+            ##start and quit 
+
+        if flying == False and flying2 == False and game_over == False and game_over2 == False:
+            display_text("Press Space to Play", small_font, white ,                  int(10),int(20))
+            display_text("Use 'R' or MOUSE to Restart", small_font, white,           int(10),int(100))
+            display_text("Player 1: UP arrow to Jump", small_font, white ,           int(10),int(160))
+            display_text("Player 2: SPACE to Jump", small_font, white,               int(10),int(200))
+            display_text("Pass through pipes to revive!", small_font, white,         int(10),int(260))
+            display_text("Brief Immunity from PIPES after revive", small_font, white,int(10),int(340))
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and flying == False and flying2 == False and game_over == False and game_over2 == False:
+                flying = True
+                flying2 = True
+                flappy.just_revived = False
+                flappy2.just_revived = False
+        pygame.display.update()
+        await asyncio.sleep(0)
+asyncio.run(main())  
+
 
